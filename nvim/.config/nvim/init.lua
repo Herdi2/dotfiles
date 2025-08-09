@@ -10,6 +10,7 @@ vim.o.smartindent = true
 
 -- Display error message in pop-up window
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open [e]rror window' })
+vim.diagnostic.config { virtual_text = false }
 
 -- Terminal configuration
 vim.keymap.set('n', '<leader>tl', '<cmd>:bel vert term<CR>')

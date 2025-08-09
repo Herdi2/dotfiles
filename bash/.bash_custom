@@ -1,0 +1,2 @@
+# Customizing bash prompt
+PS1='λ @ \W\$ '
