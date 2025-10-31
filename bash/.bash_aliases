@@ -4,5 +4,6 @@ alias proj='~/Documents/repo/'
 alias xclip='xclip -selection clipboard'
 # Show all files, including dotfiles, except for . and ..
 alias lsa='ls -lA'
-
+# View image in terminal
+alias icat="kitten icat"
 
