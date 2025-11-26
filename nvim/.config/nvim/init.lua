@@ -1,5 +1,7 @@
 require("config.lazy")
 
+vim.cmd("colorscheme github_dark_dimmed")
+
 -- Indentation Configuration
 vim.o.tabstop = 2
 vim.o.expandtab = true
