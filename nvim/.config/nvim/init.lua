@@ -2,6 +2,8 @@ require("config.lazy")
 
 vim.cmd("colorscheme gruvbox")
 
+vim.env.PATH = vim.env.HOME .. "/.ghcup/bin:" .. vim.env.PATH
+
 -- Indentation Configuration
 vim.o.tabstop = 2
 vim.o.expandtab = true
