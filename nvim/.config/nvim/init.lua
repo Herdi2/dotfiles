@@ -1,7 +1,8 @@
 require("config.lazy")
 
-vim.cmd("colorscheme gruvbox")
+vim.cmd("colorscheme habamax")
 
+-- Used to ignore HLS from mason, since it hasn't been compiled again system's GHC
 vim.env.PATH = vim.env.HOME .. "/.ghcup/bin:" .. vim.env.PATH
 
 -- Indentation Configuration
