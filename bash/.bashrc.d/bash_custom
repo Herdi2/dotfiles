@@ -1,0 +1,7 @@
+# Customizing bash prompt
+GREEN="$(tput setaf 2)"
+BLUE="$(tput setaf 4)"
+RESET="$(tput sgr0)"
+
+PROMPT_DIRTRIM=3 # Path shortener
+PS1='${GREEN}\u[$?]:${RESET}${BLUE}\w\$${RESET} '
