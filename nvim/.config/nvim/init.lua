@@ -1,119 +1,155 @@
-require("config.lazy")
+-- Division of options inspired by kickstart.nvim
 
-vim.cmd("colorscheme habamax")
+vim.g.mapleader = " "
 
--- Used to ignore HLS from mason, since it hasn't been compiled again system's GHC
-vim.env.PATH = vim.env.HOME .. "/.ghcup/bin:" .. vim.env.PATH
+do
+  -- CHAPTER 1: CORE OPTIONS
 
--- Indentation Configuration
-vim.o.tabstop = 2
-vim.o.expandtab = true
-vim.o.shiftwidth = 2
-vim.o.smartindent = true
+  -- Indentation Configuration
+  -- NOTE: Overwritten by ftplugin when possible
+  vim.o.tabstop = 2
+  vim.o.expandtab = true
+  vim.o.shiftwidth = 2
+  vim.o.autoindent = true
 
--- Display error message in pop-up window
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open [e]rror window" })
--- Disable inline error messages
-vim.diagnostic.config({ virtual_text = false })
+  -- Relative line numbers
+  vim.o.number = true
+  vim.o.relativenumber = true
+  
+  -- Sync clipboard between OS and Neovim.
+  vim.schedule(function()
+    vim.o.clipboard = "unnamedplus"
+  end)
 
--- Terminal configuration
-vim.keymap.set("n", "<leader>tl", "<cmd>:bel vert term<CR>")
-vim.keymap.set("n", "<leader>th", "<cmd>:abo vert term<CR>")
-vim.keymap.set("n", "<leader>tj", "<cmd>:bel hor term<CR>")
-vim.keymap.set("n", "<leader>tk", "<cmd>:abo hor term<CR>")
+  -- Enable break indent
+  vim.o.breakindent = true
 
--- Relative line numbering
-vim.o.number = true
-vim.o.relativenumber = true
+  -- Save undo history
+  vim.o.undofile = true
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = "a"
+  -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+  vim.o.ignorecase = true
+  vim.o.smartcase = true
 
--- Don't show the mode, since it's already in the status line
-vim.o.showmode = false
+  -- Keep signcolumn on by default
+  vim.o.signcolumn = "yes"
 
--- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.schedule(function()
-	vim.o.clipboard = "unnamedplus"
-end)
+  -- Preview substitutions live, as you type!
+  vim.o.inccommand = "split"
 
--- Enable break indent
-vim.o.breakindent = true
+  -- Show which line your cursor is on
+  vim.o.cursorline = true
 
--- Save undo history
-vim.o.undofile = true
+  -- Minimal number of screen lines to keep above and below the cursor.
+  vim.o.scrolloff = 5
 
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.o.ignorecase = true
-vim.o.smartcase = true
+  -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
+  -- instead raise a dialog asking if you wish to save the current file(s)
+  -- See `:help 'confirm'`
+  vim.o.confirm = true
 
--- Keep signcolumn on by default
-vim.o.signcolumn = "yes"
+  -- Disable inline error messages
+  vim.diagnostic.config({ virtual_text = false })
 
--- Decrease update time
-vim.o.updatetime = 250
+  -- Highlight when yanking (copying) text
+  vim.api.nvim_create_autocmd("TextYankPost", {
+    desc = "Highlight when yanking (copying) text",
+    group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+    callback = function()
+      vim.hl.on_yank()
+    end,
+  })
 
--- Decrease mapped sequence wait time
-vim.o.timeoutlen = 300
+end
 
--- Configure how new splits should be opened
-vim.o.splitright = true
-vim.o.splitbelow = true
+do
+  -- CHAPTER 2: Built-in keybinds
+    
+  -- Split configuration
+  vim.keymap.set("n", "<leader>s", "<cmd>:split <CR>", {desc = "[S]plit window"})
+  vim.keymap.set("n", "<leader>vs", "<cmd>:vsplit <CR>", {desc = "[V]ertically [S]plit window"})
 
--- Preview substitutions live, as you type!
-vim.o.inccommand = "split"
+  -- Display error message in pop-up window
+  vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open [e]rror window" })
 
--- Show which line your cursor is on
-vim.o.cursorline = true
+  -- Diagnostic keymaps
+  vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
--- Minimal number of screen lines to keep above and below the cursor.
-vim.o.scrolloff = 5
+  -- Clear highlights on search when pressing <Esc> in normal mode
+  --  See `:help hlsearch`
+  vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+  
+end
 
--- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
--- instead raise a dialog asking if you wish to save the current file(s)
--- See `:help 'confirm'`
-vim.o.confirm = true
+do
+  -- CHAPTER 3: PLUGINS
+  -- Use the built-in vim.pack
+  local gh = function(x) return 'https://github.com/' .. x end
 
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
+  -- Load plugins
+  vim.pack.add({
+    gh('neovim/nvim-lspconfig'),
+    gh('echasnovski/mini.nvim'),
+    gh('ibhagwan/fzf-lua'),
+    gh('nvim-treesitter/nvim-treesitter')
+  })
 
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+  
+  --# mini.nvim setup
+  -- Better around/inside textrobjects (e.g. `ci'` - Change Inside Quote)
+  require('mini.ai').setup({n_lines = 500})
+  -- Add/delete/replace surroundings (brackets, quotes, etc.)
+  require('mini.surround').setup()
+  -- Simple statusline setup
+  local statusline = require('mini.statusline')
+	statusline.setup({ use_icons = vim.g.have_nerd_font })
+  statusline.section_location = function() return '%2l:%-2v' end
 
--- Diagnostic keymaps
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+  --# fzf setup
+  local fzf = require('fzf-lua')
+  fzf.setup({
+    winopts = { preview = { layout = "vertical" } }
+  })
 
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+  -- Seach over files
+  vim.keymap.set('n', '<leader>ff', fzf.files, {desc = 'Find files'})
+  vim.keymap.set('n', '<leader>fg', fzf.live_grep, { desc = 'Live grep' })
+  -- LSP search with fzf, once an LSP is attached
+  vim.api.nvim_create_autocmd('LspAttach', {
+    callback = function(ev)
+      local function map(mode, lhs, fn, desc)
+        vim.keymap.set(mode, lhs, fn, { buffer = ev.buf, desc = desc })
+      end
+      map('n', 'gd',  fzf.lsp_definitions,        'Definitions')
+      map('n', 'grr', fzf.lsp_references,         'References')
+      map('n', 'gri', fzf.lsp_implementations,    'Implementations')
+      map('n', 'grt', fzf.lsp_typedefs,           'Type definitions')
+      map('n', 'gs',  fzf.lsp_document_symdols,   'Document symbols')
+      map('n', '<leader>fs', fzf.lsp_live_workspace_symbols, 'Workspace symbols')
+      map({ 'n', 'x' }, 'gra', fzf.lsp_code_actions, 'Code actions')
+      -- Hover action
+      map('n', 'T', vim.lsp.buf.hover({border = 'rounded'}), 'Hover')
+    end,
+  })
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
-vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+  --# Tree-sitter setup
+  vim.api.nvim_create_autocmd('PackChanged', { callback = function(ev)
+    -- Auto-update
+    local name, kind = ev.data.spec.name, ev.data.kind
+    if name == 'nvim-treesitter' and kind == 'update' then
+      if not ev.data.active then vim.cmd.packadd('nvim-treesitter') end
+      vim.cmd('TSUpdate')
+    end
+  end })
+  require('nvim-treesitter').setup(
+    {
+      auto_install = true
+    }
+  )
 
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
+  --# LSP
+  vim.lsp.enable({'lua_ls'})
 
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
-vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-	callback = function()
-		vim.hl.on_yank()
-	end,
-})
+
+end
+
