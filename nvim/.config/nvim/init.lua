@@ -1,6 +1,6 @@
 -- Division of options inspired by kickstart.nvim
 
-vim.g.mapleader = " "
+vim.g.mapleader = ' '
 
 do
   -- CHAPTER 1: CORE OPTIONS
@@ -15,10 +15,13 @@ do
   -- Relative line numbers
   vim.o.number = true
   vim.o.relativenumber = true
+
+  -- Use rounded pop-up borders
+  vim.o.winborder = 'rounded'
   
   -- Sync clipboard between OS and Neovim.
   vim.schedule(function()
-    vim.o.clipboard = "unnamedplus"
+    vim.o.clipboard = 'unnamedplus'
   end)
 
   -- Enable break indent
@@ -32,10 +35,10 @@ do
   vim.o.smartcase = true
 
   -- Keep signcolumn on by default
-  vim.o.signcolumn = "yes"
+  vim.o.signcolumn = 'yes'
 
   -- Preview substitutions live, as you type!
-  vim.o.inccommand = "split"
+  vim.o.inccommand = 'split'
 
   -- Show which line your cursor is on
   vim.o.cursorline = true
@@ -52,9 +55,9 @@ do
   vim.diagnostic.config({ virtual_text = false })
 
   -- Highlight when yanking (copying) text
-  vim.api.nvim_create_autocmd("TextYankPost", {
-    desc = "Highlight when yanking (copying) text",
-    group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+  vim.api.nvim_create_autocmd('TextYankPost', {
+    desc = 'Highlight when yanking (copying) text',
+    group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
     callback = function()
       vim.hl.on_yank()
     end,
@@ -66,18 +69,18 @@ do
   -- CHAPTER 2: Built-in keybinds
     
   -- Split configuration
-  vim.keymap.set("n", "<leader>s", "<cmd>:split <CR>", {desc = "[S]plit window"})
-  vim.keymap.set("n", "<leader>vs", "<cmd>:vsplit <CR>", {desc = "[V]ertically [S]plit window"})
+  vim.keymap.set('n', '<leader>hs', '<cmd>:split <CR>', {desc = '[H]orizontally [S]plit window'})
+  vim.keymap.set('n', '<leader>vs', '<cmd>:vsplit <CR>', {desc = '[V]ertically [S]plit window'})
 
   -- Display error message in pop-up window
-  vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open [e]rror window" })
+  vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open [e]rror window' })
 
   -- Diagnostic keymaps
-  vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
   -- Clear highlights on search when pressing <Esc> in normal mode
   --  See `:help hlsearch`
-  vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+  vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
   
 end
 
@@ -91,10 +94,12 @@ do
     gh('neovim/nvim-lspconfig'),
     gh('echasnovski/mini.nvim'),
     gh('ibhagwan/fzf-lua'),
-    gh('nvim-treesitter/nvim-treesitter')
+    gh('nvim-treesitter/nvim-treesitter'),
+    gh('mason-org/mason.nvim'),
+    gh('mason-org/mason-lspconfig.nvim')
   })
 
-  
+
   --# mini.nvim setup
   -- Better around/inside textrobjects (e.g. `ci'` - Change Inside Quote)
   require('mini.ai').setup({n_lines = 500})
@@ -108,7 +113,7 @@ do
   --# fzf setup
   local fzf = require('fzf-lua')
   fzf.setup({
-    winopts = { preview = { layout = "vertical" } }
+    winopts = { preview = { layout = 'vertical' } }
   })
 
   -- Seach over files
@@ -120,35 +125,37 @@ do
       local function map(mode, lhs, fn, desc)
         vim.keymap.set(mode, lhs, fn, { buffer = ev.buf, desc = desc })
       end
-      map('n', 'gd',  fzf.lsp_definitions,        'Definitions')
+      map('n', 'grd',  fzf.lsp_definitions,        'Definitions')
       map('n', 'grr', fzf.lsp_references,         'References')
       map('n', 'gri', fzf.lsp_implementations,    'Implementations')
       map('n', 'grt', fzf.lsp_typedefs,           'Type definitions')
-      map('n', 'gs',  fzf.lsp_document_symdols,   'Document symbols')
+      map('n', 'grs',  fzf.lsp_document_symbols,   'Document symbols')
       map('n', '<leader>fs', fzf.lsp_live_workspace_symbols, 'Workspace symbols')
       map({ 'n', 'x' }, 'gra', fzf.lsp_code_actions, 'Code actions')
-      -- Hover action
-      map('n', 'T', vim.lsp.buf.hover({border = 'rounded'}), 'Hover')
     end,
   })
 
   --# Tree-sitter setup
   vim.api.nvim_create_autocmd('PackChanged', { callback = function(ev)
-    -- Auto-update
+    -- Auto-update parsers with tree-sitter
     local name, kind = ev.data.spec.name, ev.data.kind
     if name == 'nvim-treesitter' and kind == 'update' then
       if not ev.data.active then vim.cmd.packadd('nvim-treesitter') end
       vim.cmd('TSUpdate')
     end
   end })
-  require('nvim-treesitter').setup(
-    {
-      auto_install = true
-    }
-  )
+
+  require('nvim-treesitter').install({'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc'})
 
   --# LSP
-  vim.lsp.enable({'lua_ls'})
+  -- Mason is used to download LSPs
+  require('mason').setup()
+  require('mason-lspconfig').setup({
+      ensure_installed = {
+        'lua_ls'
+      }
+    }
+  )
 
 
 end
