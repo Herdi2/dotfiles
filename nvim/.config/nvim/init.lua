@@ -43,6 +43,9 @@ do
   -- Show which line your cursor is on
   vim.o.cursorline = true
 
+  -- Hide mode (already in statusline)
+  vim.o.showmode = false
+
   -- Minimal number of screen lines to keep above and below the cursor.
   vim.o.scrolloff = 5
 
@@ -96,7 +99,12 @@ do
     gh('ibhagwan/fzf-lua'),
     gh('nvim-treesitter/nvim-treesitter'),
     gh('mason-org/mason.nvim'),
-    gh('mason-org/mason-lspconfig.nvim')
+    gh('mason-org/mason-lspconfig.nvim'),
+    gh('lewis6991/gitsigns.nvim'),
+    gh('hrsh7th/nvim-cmp'),
+    gh('hrsh7th/cmp-nvim-lsp'),
+    gh('hrsh7th/cmp-buffer'),
+    gh('hrsh7th/cmp-path'),
   })
 
 
@@ -152,10 +160,76 @@ do
   require('mason').setup()
   require('mason-lspconfig').setup({
       ensure_installed = {
-        'lua_ls'
+        'lua_ls',
+        'basedpyright'
       }
     }
   )
+
+  --# Gitsigns
+  require('gitsigns').setup({
+    signs = {
+      add = { text = "+" },
+      change = { text = "~" },
+      delete = { text = "_" },
+      topdelete = { text = "‾" },
+      changedelete = { text = "~" },
+    }
+  })
+
+  --# Completion
+  local cmp = require('cmp')
+
+  cmp.setup({
+    snippet = {
+      expand = function(args)
+        vim.snippet.expand(args.body)
+      end,
+    },
+
+    completion = { completeopt = 'menu,menuone,noinsert' },
+
+    -- Rounded borders
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+
+    mapping = cmp.mapping.preset.insert({
+      ['<C-n>'] = cmp.mapping.select_next_item(),
+      ['<C-p>'] = cmp.mapping.select_prev_item(),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+
+      -- Jump through snippet placeholders
+      ['<Tab>'] = cmp.mapping(function(fallback)
+        if vim.snippet.active({ direction = 1 }) then
+          vim.snippet.jump(1)
+        else
+          fallback()
+        end
+      end, { 'i', 's' }),
+      ['<S-Tab>'] = cmp.mapping(function(fallback)
+        if vim.snippet.active({ direction = -1 }) then
+          vim.snippet.jump(-1)
+        else
+          fallback()
+        end
+      end, { 'i', 's' }),
+    }),
+
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'path' },
+    }, {
+      { name = 'buffer' },
+    }),
+  })
+
+  -- Tell every LSP server that the client supports cmp's completion features
+  vim.lsp.config('*', {
+    capabilities = require('cmp_nvim_lsp').default_capabilities(),
+  })
 
 
 end
