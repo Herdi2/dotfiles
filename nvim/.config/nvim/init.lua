@@ -77,6 +77,9 @@ do
 	-- Display error message in pop-up window
 	vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open [e]rror window" })
 
+  -- Open explorer (netrw)
+	vim.keymap.set("n", "<leader>E", "<cmd>:Explore<CR>", { desc = "Open [E]xplore" })
+
 	-- Diagnostic keymaps
 	vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
@@ -107,11 +110,12 @@ do
 		gh("hrsh7th/cmp-path"),
 		gh("stevearc/conform.nvim"),
     gh("nyoom-engineering/oxocarbon.nvim"),
+    gh("vague-theme/vague.nvim"),
 	})
 
   --# Aesthetics
   vim.o.background = "dark"
-  vim.cmd.colorscheme("oxocarbon")
+  vim.cmd.colorscheme("vague")
 
 	--# mini.nvim setup
 	-- Better around/inside textrobjects (e.g. `ci'` - Change Inside Quote)
@@ -177,6 +181,7 @@ do
 		"vim",
 		"vimdoc",
 		"haskell",
+    "erlang"
 	})
 
 	--# LSP
